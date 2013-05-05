@@ -1,4 +1,4 @@
-" Vim global plugin for showing quickfix (and location list and 
+" Vim global plugin for showing quickfix (and location list and
 " Syntastic lists) in the status line.
 "
 " Maintainer: Danny O'Brien <danny@spesh.com>
@@ -12,6 +12,8 @@ let g:loaded_quickfixstatus = 101
 let s:keepcpo           = &cpo
 set cpo&vim
 
+let s:qfstatus_displaying = 0
+
 function! s:Cache_Quickfix()
     let b:qfstatus_list = {}
     if exists("b:syntastic_loclist")
@@ -21,22 +23,28 @@ function! s:Cache_Quickfix()
     endif
     for allfixes in extend(extend(getqflist(), getloclist(0)), sy)
         let err = allfixes['text']
-        let err = strpart(substitute(err,'\n',' ','g'), 0, winwidth(0)) 
+        let err = substitute(err,'\n',' ','g')
         let b:qfstatus_list[allfixes['lnum']] = err
     endfor
     call s:Show_Quickfix_In_Status()
 endfunction
- 
+
 function! s:Show_Quickfix_In_Status()
     if !exists("b:qfstatus_list")
         return
     endif
     let ln = line('.')
-    if !has_key(b:qfstatus_list,ln)
-        echo 
+    if !has_key(b:qfstatus_list, ln)
+        if s:qfstatus_displaying
+          echo
+          let s:qfstatus_displaying = 0
+        endif
         return
     else
-        echo b:qfstatus_list[ln]
+        let len = &columns - 12
+        " echo | redraw!
+        echo strpart(b:qfstatus_list[ln], 0, len)
+        let s:qfstatus_displaying = 1
     endif
 endfunction
 
