@@ -12,6 +12,10 @@ let g:loaded_quickfixstatus = 101
 let s:keepcpo           = &cpo
 set cpo&vim
 
+let g:qfstatus_trim_message = get(g:, 'qfstatus_trim_message', 1)
+" echo repeat("a", &columns - 12)
+let g:qfstatus_trim_len = get(g:, 'qfstatus_trim_len', 12)
+let g:qfstatus_tab_char = get(g:, 'qfstatus_tab_char', '  ')
 let s:qfstatus_displaying = 0
 
 function! s:Cache_Quickfix()
@@ -41,9 +45,12 @@ function! s:Show_Quickfix_In_Status()
         endif
         return
     else
-        let len = &columns - 12
-        " echo | redraw!
-        echo strpart(b:qfstatus_list[ln], 0, len)
+        if g:qfstatus_trim_message
+            let len = &cmdheight * &columns - g:qfstatus_trim_len
+            echo strpart(substitute(b:qfstatus_list[ln], "\t", g:qfstatus_tab_char, "g"), 0, len)
+        else
+            echo b:qfstatus_list[ln]
+        endif
         let s:qfstatus_displaying = 1
     endif
 endfunction
